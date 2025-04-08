@@ -38,73 +38,73 @@
 <div id="ordersContainer"></div>
 
   </div>  <script type="module">
-    const PASSCODE = "1234";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+  import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 
-    function checkPasscode() {
-      const input = document.getElementById("passcodeInput").value;
-      if (input === PASSCODE) {
-        document.getElementById("loginScreen").classList.add("hidden");
-        document.getElementById("dashboard").classList.remove("hidden");
-        loadOrders();
-      } else {
-        alert("Incorrect passcode");
+  const firebaseConfig = {
+    apiKey: "AIzaSyCLjVrbXkC37ZchQFlridEal0k-2g-trFU",
+    authDomain: "trupti-prints-ebf3b.firebaseapp.com",
+    databaseURL: "https://trupti-prints-ebf3b-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "trupti-prints-ebf3b",
+    storageBucket: "trupti-prints-ebf3b.appspot.com",
+    messagingSenderId: "105575300903",
+    appId: "1:105575300903:web:62fd83f6e0df49855d7302"
+  };
+
+  const PASSCODE = "1234";
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  window.checkPasscode = function () {
+    const input = document.getElementById("passcodeInput").value;
+    if (input === PASSCODE) {
+      document.getElementById("loginScreen").classList.add("hidden");
+      document.getElementById("dashboard").classList.remove("hidden");
+      loadOrders();
+    } else {
+      alert("Incorrect passcode");
+    }
+  }
+
+  window.submitOrder = function () {
+    const newOrder = {
+      clientName: document.getElementById("clientName").value,
+      contact: document.getElementById("contact").value,
+      product: document.getElementById("product").value,
+      subcategory: document.getElementById("subcategory").value,
+      bill: document.getElementById("bill").value,
+      payment: document.getElementById("payment").value,
+      tag: document.getElementById("tag").value,
+      timestamp: Date.now()
+    };
+
+    const orderId = "order_" + new Date().getTime();
+    set(ref(db, "orders/" + orderId), newOrder);
+    alert("Order submitted!");
+  }
+
+  function loadOrders() {
+    const ordersRef = ref(db, "orders");
+    onValue(ordersRef, (snapshot) => {
+      const orders = snapshot.val();
+      const container = document.getElementById("ordersContainer");
+      container.innerHTML = "";
+
+      for (let id in orders) {
+        const order = orders[id];
+        const div = document.createElement("div");
+        div.className = "card";
+        div.innerHTML = `
+          <b>${order.clientName}</b> (${order.contact})<br>
+          <i>${order.product} - ${order.subcategory}</i><br>
+          Bill: ₹${order.bill}<br>
+          Payment: ${order.payment}<br>
+          <span class="tag">${order.tag}</span>
+        `;
+        container.appendChild(div);
       }
-    }
-
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
-
-    const firebaseConfig = {
-  apiKey: "AIzaSyCLjVrbXkC37ZchQFlridEal0k-2g-trFU",
-  authDomain: "trupti-prints-ebf3b.firebaseapp.com",
-  databaseURL: "https://trupti-prints-ebf3b-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "trupti-prints-ebf3b",
-  storageBucket: "trupti-prints-ebf3b.appspot.com",
-  messagingSenderId: "105575300903",
-  appId: "1:105575300903:web:62fd83f6e0df49855d7302"
-};
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    function submitOrder() {
-      const newOrder = {
-        clientName: document.getElementById("clientName").value,
-        contact: document.getElementById("contact").value,
-        product: document.getElementById("product").value,
-        subcategory: document.getElementById("subcategory").value,
-        bill: document.getElementById("bill").value,
-        payment: document.getElementById("payment").value,
-        tag: document.getElementById("tag").value,
-        timestamp: Date.now()
-      };
-
-      const orderId = "order_" + new Date().getTime();
-      set(ref(db, "orders/" + orderId), newOrder);
-      alert("Order submitted!");
-    }
-
-    function loadOrders() {
-      const ordersRef = ref(db, "orders");
-      onValue(ordersRef, (snapshot) => {
-        const orders = snapshot.val();
-        const container = document.getElementById("ordersContainer");
-        container.innerHTML = "";
-
-        for (let id in orders) {
-          const order = orders[id];
-          const div = document.createElement("div");
-          div.className = "card";
-          div.innerHTML = `
-            <b>${order.clientName}</b> (${order.contact})<br>
-            <i>${order.product} - ${order.subcategory}</i><br>
-            Bill: ₹${order.bill}<br>
-            Payment: ${order.payment}<br>
-            <span class="tag">${order.tag}</span>
-          `;
-          container.appendChild(div);
-        }
-      });
-    }
-  </script></body>
+    });
+  }
+</script></body>
 </html>
