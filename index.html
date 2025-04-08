@@ -151,6 +151,29 @@
       }
     });
   }
+document.getElementById("submitBtn").addEventListener("click", () => {
+  const newOrder = {
+    clientName: document.getElementById("clientName").value,
+    contact: document.getElementById("contact").value,
+    product: document.getElementById("product").value,
+    subcategory: document.getElementById("subcategory").value,
+    bill: document.getElementById("bill").value,
+    payment: document.getElementById("payment").value,
+    tag: document.getElementById("tag").value,
+    timestamp: Date.now()
+  };
+
+  const orderId = "order_" + newOrder.timestamp;
+  set(ref(db, "orders/" + orderId), newOrder)
+    .then(() => {
+      alert("Order submitted successfully!");
+      loadOrders(); // Refresh the orders list
+    })
+    .catch((error) => {
+      alert("Error submitting order: " + error.message);
+      console.error("Submit Order Error:", error);
+    });
+});
 </script>
 </body>
 </html>
