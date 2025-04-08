@@ -64,10 +64,8 @@
 
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
-
   const PASSCODE = "1234";
 
-  // Login
   document.getElementById("loginBtn").addEventListener("click", () => {
     const input = document.getElementById("passcodeInput").value;
     if (input === PASSCODE) {
@@ -79,7 +77,6 @@
     }
   });
 
-  // Submit Order with Debugging
   document.getElementById("submitBtn").addEventListener("click", () => {
     const clientName = document.getElementById("clientName").value.trim();
     const contact = document.getElementById("contact").value.trim();
@@ -89,12 +86,8 @@
     const payment = document.getElementById("payment").value;
     const tag = document.getElementById("tag").value;
 
-    console.log("Submit button clicked");
-    console.log({ clientName, contact, product, subcategory, bill, payment, tag });
-
     if (!clientName || !contact || !product || !subcategory || !bill) {
       alert("Please fill all fields before submitting.");
-      console.warn("Validation failed");
       return;
     }
 
@@ -110,21 +103,19 @@
     };
 
     const orderId = "order_" + new Date().getTime();
-    console.log("Saving to Firebase with ID:", orderId);
 
     set(ref(db, "orders/" + orderId), newOrder)
       .then(() => {
         alert("Order submitted!");
-        console.log("Order submitted successfully");
-        loadOrders(); // Refresh list
+        clearForm();
+        loadOrders();
       })
       .catch((error) => {
-        alert("Error submitting order");
-        console.error("Firebase error:", error);
+        console.error("Submission Error:", error);
+        alert("Error submitting order. Check console.");
       });
   });
 
-  // Load Orders
   function loadOrders() {
     const ordersRef = ref(db, "orders");
     onValue(ordersRef, (snapshot) => {
@@ -133,7 +124,7 @@
       container.innerHTML = "";
 
       if (orders) {
-        Object.keys(orders).forEach((id) => {
+        Object.keys(orders).reverse().forEach((id) => {
           const order = orders[id];
           const div = document.createElement("div");
           div.className = "card";
@@ -148,6 +139,16 @@
         });
       }
     });
+  }
+
+  function clearForm() {
+    document.getElementById("clientName").value = "";
+    document.getElementById("contact").value = "";
+    document.getElementById("product").value = "";
+    document.getElementById("subcategory").value = "";
+    document.getElementById("bill").value = "";
+    document.getElementById("payment").selectedIndex = 0;
+    document.getElementById("tag").selectedIndex = 0;
   }
 </script>
 </body>
