@@ -55,13 +55,14 @@
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 
     const firebaseConfig = {
-      apiKey: "AIzaSyCLjVrbXkC37ZchQFlridEal0k-2g-trFU",
-      authDomain: "trupti-prints-ebf3b.firebaseapp.com",
-      projectId: "trupti-prints-ebf3b",
-      storageBucket: "trupti-prints-ebf3b.firebasestorage.app",
-      messagingSenderId: "105575300903",
-      appId: "1:105575300903:web:62fd83f6e0df49855d7302"
-    };
+  apiKey: "AIzaSyCLjVrbXkC37ZchQFlridEal0k-2g-trFU",
+  authDomain: "trupti-prints-ebf3b.firebaseapp.com",
+  projectId: "trupti-prints-ebf3b",
+  storageBucket: "trupti-prints-ebf3b.appspot.com",
+  messagingSenderId: "105575300903",
+  appId: "1:105575300903:web:62fd83f6e0df49855d7302",
+  databaseURL: "https://trupti-prints-ebf3b-default-rtdb.firebaseio.com/"
+};
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
