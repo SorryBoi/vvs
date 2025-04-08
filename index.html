@@ -31,10 +31,12 @@
     <input id="subcategory" placeholder="Sub-Category" />
     <input id="bill" placeholder="Bill Amount" type="number" />
     <select id="payment">
+      <option value="">-- Select Payment --</option>
       <option value="Paid">Paid</option>
       <option value="Not Paid">Not Paid</option>
     </select>
     <select id="tag">
+      <option value="">-- Select Tag --</option>
       <option>Order In Process</option>
       <option>Order Ready</option>
       <option>Order Delivered</option>
@@ -64,8 +66,10 @@
 
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
+
   const PASSCODE = "1234";
 
+  // Login logic
   document.getElementById("loginBtn").addEventListener("click", () => {
     const input = document.getElementById("passcodeInput").value;
     if (input === PASSCODE) {
@@ -77,9 +81,8 @@
     }
   });
 
+  // Submit order logic
   document.getElementById("submitBtn").addEventListener("click", async () => {
-    console.log("Submit button clicked");
-
     const clientName = document.getElementById("clientName").value.trim();
     const contact = document.getElementById("contact").value.trim();
     const product = document.getElementById("product").value.trim();
@@ -88,15 +91,11 @@
     const payment = document.getElementById("payment").value;
     const tag = document.getElementById("tag").value;
 
-    if (!clientName || !contact || !product || !subcategory || !bill) {
-      alert("Please fill all fields before submitting.");
-      console.log("Form validation failed.");
+    if (!clientName || !contact || !product || !subcategory || !bill || !payment || !tag) {
+      alert("Please fill all the fields.");
       return;
     }
 
-    console.log("All fields filled, proceeding to Firebase");
-
-    const orderId = "order_" + Date.now();
     const newOrder = {
       clientName,
       contact,
@@ -108,29 +107,29 @@
       timestamp: Date.now()
     };
 
+    const orderId = "order_" + new Date().getTime();
     try {
-      console.log("Writing to Firebase...");
       await set(ref(db, "orders/" + orderId), newOrder);
-      console.log("Firebase write complete");
-      alert("Order submitted successfully.");
-
-      document.getElementById("clientName").value = "";
-      document.getElementById("contact").value = "";
-      document.getElementById("product").value = "";
-      document.getElementById("subcategory").value = "";
-      document.getElementById("bill").value = "";
-      document.getElementById("payment").selectedIndex = 0;
-      document.getElementById("tag").selectedIndex = 0;
-
-      loadOrders();
+      alert("Order submitted successfully!");
+      clearForm();
     } catch (error) {
-      console.error("Firebase error:", error);
-      alert("Submission failed. Check console for details.");
+      console.error("Submission error:", error);
+      alert("Failed to submit order. Try again.");
     }
   });
 
+  function clearForm() {
+    document.getElementById("clientName").value = "";
+    document.getElementById("contact").value = "";
+    document.getElementById("product").value = "";
+    document.getElementById("subcategory").value = "";
+    document.getElementById("bill").value = "";
+    document.getElementById("payment").value = "";
+    document.getElementById("tag").value = "";
+  }
+
+  // Load orders
   function loadOrders() {
-    console.log("Loading orders...");
     const ordersRef = ref(db, "orders");
     onValue(ordersRef, (snapshot) => {
       const orders = snapshot.val();
@@ -138,7 +137,7 @@
       container.innerHTML = "";
 
       if (orders) {
-        Object.keys(orders).reverse().forEach((id) => {
+        Object.keys(orders).sort((a, b) => orders[b].timestamp - orders[a].timestamp).forEach((id) => {
           const order = orders[id];
           const div = document.createElement("div");
           div.className = "card";
