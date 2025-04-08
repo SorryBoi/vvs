@@ -31,12 +31,12 @@
     <input id="subcategory" placeholder="Sub-Category" />
     <input id="bill" placeholder="Bill Amount" type="number" />
     <select id="payment">
-      <option value="">-- Select Payment --</option>
+      <option value="">Select Payment Status</option>
       <option value="Paid">Paid</option>
       <option value="Not Paid">Not Paid</option>
     </select>
     <select id="tag">
-      <option value="">-- Select Tag --</option>
+      <option value="">Select Tag</option>
       <option>Order In Process</option>
       <option>Order Ready</option>
       <option>Order Delivered</option>
@@ -69,7 +69,6 @@
 
   const PASSCODE = "1234";
 
-  // Login logic
   document.getElementById("loginBtn").addEventListener("click", () => {
     const input = document.getElementById("passcodeInput").value;
     if (input === PASSCODE) {
@@ -81,8 +80,7 @@
     }
   });
 
-  // Submit order logic
-  document.getElementById("submitBtn").addEventListener("click", async () => {
+  document.getElementById("submitBtn").addEventListener("click", () => {
     const clientName = document.getElementById("clientName").value.trim();
     const contact = document.getElementById("contact").value.trim();
     const product = document.getElementById("product").value.trim();
@@ -91,6 +89,7 @@
     const payment = document.getElementById("payment").value;
     const tag = document.getElementById("tag").value;
 
+    // Validate
     if (!clientName || !contact || !product || !subcategory || !bill || !payment || !tag) {
       alert("Please fill all the fields.");
       return;
@@ -107,15 +106,17 @@
       timestamp: Date.now()
     };
 
-    const orderId = "order_" + new Date().getTime();
-    try {
-      await set(ref(db, "orders/" + orderId), newOrder);
-      alert("Order submitted successfully!");
-      clearForm();
-    } catch (error) {
-      console.error("Submission error:", error);
-      alert("Failed to submit order. Try again.");
-    }
+    const orderId = "order_" + Date.now();
+    set(ref(db, "orders/" + orderId), newOrder)
+      .then(() => {
+        alert("Order submitted!");
+        clearForm();
+        loadOrders();
+      })
+      .catch((error) => {
+        alert("Error submitting order: " + error);
+        console.error(error);
+      });
   });
 
   function clearForm() {
@@ -128,7 +129,6 @@
     document.getElementById("tag").value = "";
   }
 
-  // Load orders
   function loadOrders() {
     const ordersRef = ref(db, "orders");
     onValue(ordersRef, (snapshot) => {
@@ -137,7 +137,7 @@
       container.innerHTML = "";
 
       if (orders) {
-        Object.keys(orders).sort((a, b) => orders[b].timestamp - orders[a].timestamp).forEach((id) => {
+        Object.keys(orders).reverse().forEach(id => {
           const order = orders[id];
           const div = document.createElement("div");
           div.className = "card";
