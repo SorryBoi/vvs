@@ -66,10 +66,7 @@
   const db = getDatabase(app);
   const PASSCODE = "1234";
 
-  const loginBtn = document.getElementById("loginBtn");
-  const submitBtn = document.getElementById("submitBtn");
-
-  loginBtn.addEventListener("click", () => {
+  document.getElementById("loginBtn").addEventListener("click", () => {
     const input = document.getElementById("passcodeInput").value;
     if (input === PASSCODE) {
       document.getElementById("loginScreen").classList.add("hidden");
@@ -80,7 +77,9 @@
     }
   });
 
-  submitBtn.addEventListener("click", async () => {
+  document.getElementById("submitBtn").addEventListener("click", async () => {
+    console.log("Submit button clicked");
+
     const clientName = document.getElementById("clientName").value.trim();
     const contact = document.getElementById("contact").value.trim();
     const product = document.getElementById("product").value.trim();
@@ -91,8 +90,11 @@
 
     if (!clientName || !contact || !product || !subcategory || !bill) {
       alert("Please fill all fields before submitting.");
+      console.log("Form validation failed.");
       return;
     }
+
+    console.log("All fields filled, proceeding to Firebase");
 
     const orderId = "order_" + Date.now();
     const newOrder = {
@@ -106,21 +108,29 @@
       timestamp: Date.now()
     };
 
-    console.log("Submitting Order:", newOrder);
-
     try {
+      console.log("Writing to Firebase...");
       await set(ref(db, "orders/" + orderId), newOrder);
-      console.log("Order submitted to Firebase!");
+      console.log("Firebase write complete");
       alert("Order submitted successfully.");
-      clearForm();
+
+      document.getElementById("clientName").value = "";
+      document.getElementById("contact").value = "";
+      document.getElementById("product").value = "";
+      document.getElementById("subcategory").value = "";
+      document.getElementById("bill").value = "";
+      document.getElementById("payment").selectedIndex = 0;
+      document.getElementById("tag").selectedIndex = 0;
+
       loadOrders();
     } catch (error) {
-      console.error("Error submitting order:", error);
-      alert("Failed to submit order. Please try again.");
+      console.error("Firebase error:", error);
+      alert("Submission failed. Check console for details.");
     }
   });
 
   function loadOrders() {
+    console.log("Loading orders...");
     const ordersRef = ref(db, "orders");
     onValue(ordersRef, (snapshot) => {
       const orders = snapshot.val();
@@ -143,17 +153,6 @@
         });
       }
     });
-  }
-
-  function clearForm() {
-    document.getElementById("clientName").value = "";
-    document.getElementById("contact").value = "";
-    document.getElementById("product").value = "";
-    document.getElementById("subcategory").value = "";
-    document.getElementById("bill").value = "";
-    document.getElementById("payment").selectedIndex = 0;
-    document.getElementById("tag").selectedIndex = 0;
-    console.log("Form cleared.");
   }
 </script>
 </body>
