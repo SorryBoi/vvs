@@ -53,17 +53,18 @@
   import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 
   const firebaseConfig = {
-  apiKey: "AIzaSyCLjVrbXkC37ZchQFlridEal0k-2g-trFU",
-  authDomain: "trupti-prints-ebf3b.firebaseapp.com",
-  databaseURL: "https://trupti-prints-ebf3b-default-rtdb.firebaseio.com",
-  projectId: "trupti-prints-ebf3b",
-  storageBucket: "trupti-prints-ebf3b.appspot.com",
-  messagingSenderId: "105575300903",
-  appId: "1:105575300903:web:62fd83f6e0df49855d7302"
-};
+    apiKey: "AIzaSyCLjVrbXkC37ZchQFlridEal0k-2g-trFU",
+    authDomain: "trupti-prints-ebf3b.firebaseapp.com",
+    databaseURL: "https://trupti-prints-ebf3b-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "trupti-prints-ebf3b",
+    storageBucket: "trupti-prints-ebf3b.appspot.com",
+    messagingSenderId: "105575300903",
+    appId: "1:105575300903:web:62fd83f6e0df49855d7302"
+  };
 
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
+
   const PASSCODE = "1234";
 
   // Login
@@ -78,7 +79,7 @@
     }
   });
 
-  // Submit Order
+  // Submit Order with Debugging
   document.getElementById("submitBtn").addEventListener("click", () => {
     const clientName = document.getElementById("clientName").value.trim();
     const contact = document.getElementById("contact").value.trim();
@@ -88,8 +89,12 @@
     const payment = document.getElementById("payment").value;
     const tag = document.getElementById("tag").value;
 
+    console.log("Submit button clicked");
+    console.log({ clientName, contact, product, subcategory, bill, payment, tag });
+
     if (!clientName || !contact || !product || !subcategory || !bill) {
-      alert("Please fill all the fields.");
+      alert("Please fill all fields before submitting.");
+      console.warn("Validation failed");
       return;
     }
 
@@ -105,13 +110,17 @@
     };
 
     const orderId = "order_" + new Date().getTime();
+    console.log("Saving to Firebase with ID:", orderId);
+
     set(ref(db, "orders/" + orderId), newOrder)
       .then(() => {
         alert("Order submitted!");
+        console.log("Order submitted successfully");
+        loadOrders(); // Refresh list
       })
       .catch((error) => {
-        alert("Error submitting order: " + error);
-        console.error(error);
+        alert("Error submitting order");
+        console.error("Firebase error:", error);
       });
   });
 
@@ -124,7 +133,7 @@
       container.innerHTML = "";
 
       if (orders) {
-        for (let id in orders) {
+        Object.keys(orders).forEach((id) => {
           const order = orders[id];
           const div = document.createElement("div");
           div.className = "card";
@@ -136,7 +145,7 @@
             <span class="tag">${order.tag}</span>
           `;
           container.appendChild(div);
-        }
+        });
       }
     });
   }
