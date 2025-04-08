@@ -66,7 +66,10 @@
   const db = getDatabase(app);
   const PASSCODE = "1234";
 
-  document.getElementById("loginBtn").addEventListener("click", () => {
+  const loginBtn = document.getElementById("loginBtn");
+  const submitBtn = document.getElementById("submitBtn");
+
+  loginBtn.addEventListener("click", () => {
     const input = document.getElementById("passcodeInput").value;
     if (input === PASSCODE) {
       document.getElementById("loginScreen").classList.add("hidden");
@@ -77,7 +80,7 @@
     }
   });
 
-  document.getElementById("submitBtn").addEventListener("click", () => {
+  submitBtn.addEventListener("click", async () => {
     const clientName = document.getElementById("clientName").value.trim();
     const contact = document.getElementById("contact").value.trim();
     const product = document.getElementById("product").value.trim();
@@ -91,6 +94,7 @@
       return;
     }
 
+    const orderId = "order_" + Date.now();
     const newOrder = {
       clientName,
       contact,
@@ -102,18 +106,18 @@
       timestamp: Date.now()
     };
 
-    const orderId = "order_" + new Date().getTime();
+    console.log("Submitting Order:", newOrder);
 
-    set(ref(db, "orders/" + orderId), newOrder)
-      .then(() => {
-        alert("Order submitted!");
-        clearForm();
-        loadOrders();
-      })
-      .catch((error) => {
-        console.error("Submission Error:", error);
-        alert("Error submitting order. Check console.");
-      });
+    try {
+      await set(ref(db, "orders/" + orderId), newOrder);
+      console.log("Order submitted to Firebase!");
+      alert("Order submitted successfully.");
+      clearForm();
+      loadOrders();
+    } catch (error) {
+      console.error("Error submitting order:", error);
+      alert("Failed to submit order. Please try again.");
+    }
   });
 
   function loadOrders() {
@@ -149,6 +153,7 @@
     document.getElementById("bill").value = "";
     document.getElementById("payment").selectedIndex = 0;
     document.getElementById("tag").selectedIndex = 0;
+    console.log("Form cleared.");
   }
 </script>
 </body>
