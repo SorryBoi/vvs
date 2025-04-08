@@ -49,11 +49,9 @@
 
 <!-- Firebase + Script -->
 <script type="module">
-  // Firebase imports
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
   import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 
-  // Firebase config
   const firebaseConfig = {
     apiKey: "AIzaSyCLjVrbXkC37ZchQFlridEal0k-2g-trFU",
     authDomain: "trupti-prints-ebf3b.firebaseapp.com",
@@ -66,7 +64,6 @@
 
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
-
   const PASSCODE = "1234";
 
   // Login logic
@@ -83,14 +80,27 @@
 
   // Submit order logic
   document.getElementById("submitBtn").addEventListener("click", () => {
+    const clientName = document.getElementById("clientName").value;
+    const contact = document.getElementById("contact").value;
+    const product = document.getElementById("product").value;
+    const subcategory = document.getElementById("subcategory").value;
+    const bill = document.getElementById("bill").value;
+    const payment = document.getElementById("payment").value;
+    const tag = document.getElementById("tag").value;
+
+    if (!clientName || !contact || !product || !subcategory || !bill) {
+      alert("Please fill all fields.");
+      return;
+    }
+
     const newOrder = {
-      clientName: document.getElementById("clientName").value,
-      contact: document.getElementById("contact").value,
-      product: document.getElementById("product").value,
-      subcategory: document.getElementById("subcategory").value,
-      bill: document.getElementById("bill").value,
-      payment: document.getElementById("payment").value,
-      tag: document.getElementById("tag").value,
+      clientName,
+      contact,
+      product,
+      subcategory,
+      bill,
+      payment,
+      tag,
       timestamp: Date.now()
     };
 
@@ -98,14 +108,24 @@
     set(ref(db, "orders/" + orderId), newOrder)
       .then(() => {
         alert("Order submitted!");
+        clearForm();
       })
       .catch((error) => {
-        alert("Error submitting order: " + error);
+        alert("Error submitting order: " + error.message);
         console.error(error);
       });
   });
 
-  // Load orders and display them
+  function clearForm() {
+    document.getElementById("clientName").value = "";
+    document.getElementById("contact").value = "";
+    document.getElementById("product").value = "";
+    document.getElementById("subcategory").value = "";
+    document.getElementById("bill").value = "";
+    document.getElementById("payment").value = "Paid";
+    document.getElementById("tag").value = "Order In Process";
+  }
+
   function loadOrders() {
     const ordersRef = ref(db, "orders");
     onValue(ordersRef, (snapshot) => {
@@ -114,7 +134,8 @@
       container.innerHTML = "";
 
       if (orders) {
-        for (let id in orders) {
+        const sortedKeys = Object.keys(orders).sort((a, b) => orders[b].timestamp - orders[a].timestamp);
+        for (let id of sortedKeys) {
           const order = orders[id];
           const div = document.createElement("div");
           div.className = "card";
