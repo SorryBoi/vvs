@@ -1,7 +1,8 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>TRUPTI PRINTS - Order Manager</title>
   <style>
     body { font-family: sans-serif; padding: 20px; background: #f4f4f4; }
@@ -11,36 +12,48 @@
     .tag { font-size: 12px; padding: 4px 8px; background: #eee; border-radius: 4px; display: inline-block; margin-top: 5px; }
   </style>
 </head>
-<body>  <!-- Passcode Screen -->  <div id="loginScreen">
-    <h2>Enter Passcode</h2>
-    <input type="password" id="passcodeInput" placeholder="Passcode" />
-    <button onclick="checkPasscode()">Login</button>
-  </div>  <!-- Main Dashboard -->  <div id="dashboard" class="hidden">
-    <h2>New Order</h2>
-    <div class="card">
-      <input id="clientName" placeholder="Client Name" />
-      <input id="contact" placeholder="Contact Number" />
-      <input id="product" placeholder="Product Type" />
-      <input id="subcategory" placeholder="Sub-Category" />
-      <input id="bill" placeholder="Bill Amount" type="number" />
-      <select id="payment">
-        <option value="Paid">Paid</option>
-        <option value="Not Paid">Not Paid</option>
-      </select>
-      <select id="tag">
-        <option>Order In Process</option>
-        <option>Order Ready</option>
-        <option>Order Delivered</option>
-        <option>Payment</option>
-      </select>
-      <button onclick="submitOrder()">Submit Order</button>
-    </div><h2>Orders</h2>
-<div id="ordersContainer"></div>
+<body>
 
-  </div>  <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-  import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+<!-- Passcode Screen -->
+<div id="loginScreen">
+  <h2>Enter Passcode</h2>
+  <input type="password" id="passcodeInput" placeholder="Passcode" />
+  <button id="loginBtn">Login</button>
+</div>
 
+<!-- Main Dashboard -->
+<div id="dashboard" class="hidden">
+  <h2>New Order</h2>
+  <div class="card">
+    <input id="clientName" placeholder="Client Name" />
+    <input id="contact" placeholder="Contact Number" />
+    <input id="product" placeholder="Product Type" />
+    <input id="subcategory" placeholder="Sub-Category" />
+    <input id="bill" placeholder="Bill Amount" type="number" />
+    <select id="payment">
+      <option value="Paid">Paid</option>
+      <option value="Not Paid">Not Paid</option>
+    </select>
+    <select id="tag">
+      <option>Order In Process</option>
+      <option>Order Ready</option>
+      <option>Order Delivered</option>
+      <option>Payment</option>
+    </select>
+    <button id="submitBtn">Submit Order</button>
+  </div>
+
+  <h2>Orders</h2>
+  <div id="ordersContainer"></div>
+</div>
+
+<!-- Firebase + Script -->
+<script type="module">
+  // Firebase imports
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+  import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
+
+  // Firebase config
   const firebaseConfig = {
     apiKey: "AIzaSyCLjVrbXkC37ZchQFlridEal0k-2g-trFU",
     authDomain: "trupti-prints-ebf3b.firebaseapp.com",
@@ -51,12 +64,13 @@
     appId: "1:105575300903:web:62fd83f6e0df49855d7302"
   };
 
-  const PASSCODE = "1234";
-
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  window.checkPasscode = function () {
+  const PASSCODE = "1234";
+
+  // Login logic
+  document.getElementById("loginBtn").addEventListener("click", () => {
     const input = document.getElementById("passcodeInput").value;
     if (input === PASSCODE) {
       document.getElementById("loginScreen").classList.add("hidden");
@@ -65,62 +79,57 @@
     } else {
       alert("Incorrect passcode");
     }
-  }
+  });
 
-  function submitOrder() {
-  const newOrder = {
-    clientName: document.getElementById("clientName").value,
-    contact: document.getElementById("contact").value,
-    product: document.getElementById("product").value,
-    subcategory: document.getElementById("subcategory").value,
-    bill: document.getElementById("bill").value,
-    payment: document.getElementById("payment").value,
-    tag: document.getElementById("tag").value,
-    timestamp: Date.now()
-  };
-
-  const orderId = "order_" + new Date().getTime();
-  console.log("Submitting order:", newOrder);
-
-  set(ref(db, "orders/" + orderId), newOrder)
-    .then(() => {
-      alert("Order submitted!");
-    })
-    .catch((error) => {
-      console.error("Error submitting order:", error);
-    });
-}
+  // Submit order logic
+  document.getElementById("submitBtn").addEventListener("click", () => {
+    const newOrder = {
+      clientName: document.getElementById("clientName").value,
+      contact: document.getElementById("contact").value,
+      product: document.getElementById("product").value,
+      subcategory: document.getElementById("subcategory").value,
+      bill: document.getElementById("bill").value,
+      payment: document.getElementById("payment").value,
+      tag: document.getElementById("tag").value,
+      timestamp: Date.now()
+    };
 
     const orderId = "order_" + new Date().getTime();
-    set(ref(db, "orders/" + orderId), newOrder);
-    alert("Order submitted!");
-  }
-
-  function loadOrders() {
-  const ordersRef = ref(db, "orders");
-  onValue(ordersRef, (snapshot) => {
-    const orders = snapshot.val();
-    console.log("Fetched orders:", orders);
-    
-    const container = document.getElementById("ordersContainer");
-    container.innerHTML = "";
-
-    for (let id in orders) {
-      const order = orders[id];
-      const div = document.createElement("div");
-      div.className = "card";
-      div.innerHTML = `
-        <b>${order.clientName}</b> (${order.contact})<br>
-        <i>${order.product} - ${order.subcategory}</i><br>
-        Bill: ₹${order.bill}<br>
-        Payment: ${order.payment}<br>
-        <span class="tag">${order.tag}</span>
-      `;
-      container.appendChild(div);
-    }
-  }, {
-    onlyOnce: false
+    set(ref(db, "orders/" + orderId), newOrder)
+      .then(() => {
+        alert("Order submitted!");
+      })
+      .catch((error) => {
+        alert("Error submitting order: " + error);
+        console.error(error);
+      });
   });
-}
-</script></body>
+
+  // Load orders and display them
+  function loadOrders() {
+    const ordersRef = ref(db, "orders");
+    onValue(ordersRef, (snapshot) => {
+      const orders = snapshot.val();
+      const container = document.getElementById("ordersContainer");
+      container.innerHTML = "";
+
+      if (orders) {
+        for (let id in orders) {
+          const order = orders[id];
+          const div = document.createElement("div");
+          div.className = "card";
+          div.innerHTML = `
+            <b>${order.clientName}</b> (${order.contact})<br>
+            <i>${order.product} - ${order.subcategory}</i><br>
+            Bill: ₹${order.bill}<br>
+            Payment: ${order.payment}<br>
+            <span class="tag">${order.tag}</span>
+          `;
+          container.appendChild(div);
+        }
+      }
+    });
+  }
+</script>
+</body>
 </html>
