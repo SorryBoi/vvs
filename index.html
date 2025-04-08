@@ -53,20 +53,20 @@
   import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 
   const firebaseConfig = {
-  apiKey: "AIzaSyCLjVrbXkC37ZchQFlridEal0k-2g-trFU",
-  authDomain: "trupti-prints-ebf3b.firebaseapp.com",
-  databaseURL: "https://trupti-prints-ebf3b-default-rtdb.firebaseio.com",
-  projectId: "trupti-prints-ebf3b",
-  storageBucket: "trupti-prints-ebf3b.appspot.com",
-  messagingSenderId: "105575300903",
-  appId: "1:105575300903:web:62fd83f6e0df49855d7302"
-};
+    apiKey: "AIzaSyCLjVrbXkC37ZchQFlridEal0k-2g-trFU",
+    authDomain: "trupti-prints-ebf3b.firebaseapp.com",
+    databaseURL: "https://trupti-prints-ebf3b-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "trupti-prints-ebf3b",
+    storageBucket: "trupti-prints-ebf3b.appspot.com",
+    messagingSenderId: "105575300903",
+    appId: "1:105575300903:web:62fd83f6e0df49855d7302"
+  };
 
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
   const PASSCODE = "1234";
 
-  // Login logic
+  // Login
   document.getElementById("loginBtn").addEventListener("click", () => {
     const input = document.getElementById("passcodeInput").value;
     if (input === PASSCODE) {
@@ -78,18 +78,18 @@
     }
   });
 
-  // Submit order logic
+  // Submit Order
   document.getElementById("submitBtn").addEventListener("click", () => {
-    const clientName = document.getElementById("clientName").value;
-    const contact = document.getElementById("contact").value;
-    const product = document.getElementById("product").value;
-    const subcategory = document.getElementById("subcategory").value;
-    const bill = document.getElementById("bill").value;
+    const clientName = document.getElementById("clientName").value.trim();
+    const contact = document.getElementById("contact").value.trim();
+    const product = document.getElementById("product").value.trim();
+    const subcategory = document.getElementById("subcategory").value.trim();
+    const bill = document.getElementById("bill").value.trim();
     const payment = document.getElementById("payment").value;
     const tag = document.getElementById("tag").value;
 
     if (!clientName || !contact || !product || !subcategory || !bill) {
-      alert("Please fill all fields.");
+      alert("Please fill all the fields.");
       return;
     }
 
@@ -108,24 +108,14 @@
     set(ref(db, "orders/" + orderId), newOrder)
       .then(() => {
         alert("Order submitted!");
-        clearForm();
       })
       .catch((error) => {
-        alert("Error submitting order: " + error.message);
+        alert("Error submitting order: " + error);
         console.error(error);
       });
   });
 
-  function clearForm() {
-    document.getElementById("clientName").value = "";
-    document.getElementById("contact").value = "";
-    document.getElementById("product").value = "";
-    document.getElementById("subcategory").value = "";
-    document.getElementById("bill").value = "";
-    document.getElementById("payment").value = "Paid";
-    document.getElementById("tag").value = "Order In Process";
-  }
-
+  // Load Orders
   function loadOrders() {
     const ordersRef = ref(db, "orders");
     onValue(ordersRef, (snapshot) => {
@@ -134,8 +124,7 @@
       container.innerHTML = "";
 
       if (orders) {
-        const sortedKeys = Object.keys(orders).sort((a, b) => orders[b].timestamp - orders[a].timestamp);
-        for (let id of sortedKeys) {
+        for (let id in orders) {
           const order = orders[id];
           const div = document.createElement("div");
           div.className = "card";
@@ -151,29 +140,6 @@
       }
     });
   }
-document.getElementById("submitBtn").addEventListener("click", () => {
-  const newOrder = {
-    clientName: document.getElementById("clientName").value,
-    contact: document.getElementById("contact").value,
-    product: document.getElementById("product").value,
-    subcategory: document.getElementById("subcategory").value,
-    bill: document.getElementById("bill").value,
-    payment: document.getElementById("payment").value,
-    tag: document.getElementById("tag").value,
-    timestamp: Date.now()
-  };
-
-  const orderId = "order_" + newOrder.timestamp;
-  set(ref(db, "orders/" + orderId), newOrder)
-    .then(() => {
-      alert("Order submitted successfully!");
-      loadOrders(); // Refresh the orders list
-    })
-    .catch((error) => {
-      alert("Error submitting order: " + error.message);
-      console.error("Submit Order Error:", error);
-    });
-});
 </script>
 </body>
 </html>
